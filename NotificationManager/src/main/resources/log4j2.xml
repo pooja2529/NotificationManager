@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="15">
+
+	<Properties>
+		<Property name="LOG_PATTERN">%d{HH:mm:ss.SSS} [%t] %-5level %C{1}
+			(%F:%L)-%msg%n </Property>
+		<Property name="APP_LOG_ROOT">d:/temp</Property>
+		<Property name="PROJECT">NotificationManager</Property>
+		<Property name="MaxBackupIndex" value="2" />
+
+
+
+	</Properties>
+
+	<Appenders>
+
+		<Console name="Console" target="SYSTEM_OUT" follow="true">
+			<PatternLayout pattern="${LOG_PATTERN}" />
+		</Console>
+
+		<RollingFile name="debugLog"
+			fileName="${sys:APP_LOG_ROOT}/${PROJECT}-debug-${date:yyyy-MM-dd}.log"
+			filePattern="${sys:APP_LOG_ROOT}/${PROJECT}-debug-%d{yyyy-MM-dd}-%i.log">
+			<!-- Matches only DEBUG level -->
+			<LevelRangeFilter minLevel="DEBUG" maxLevel="DEBUG"
+				onMatch="ACCEPT" onMismatch="DENY" />
+
+			<PatternLayout pattern="${LOG_PATTERN}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="3KB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+
+		<RollingFile name="infoLog"
+			fileName="${sys:APP_LOG_ROOT}/${PROJECT}-info-${date:yyyy-MM-dd}.log"
+			filePattern="${sys:APP_LOG_ROOT}/${PROJECT}-info-%d{yyyy-MM-dd}-%i.log">
+
+			<!-- Matches only INFO level -->
+			<LevelRangeFilter minLevel="INFO" maxLevel="INFO"
+				onMatch="ACCEPT" onMismatch="DENY" />
+
+			<PatternLayout pattern="${LOG_PATTERN}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="3KB" />
+			</Policies>
+
+			<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+
+		<RollingFile name="errorLog"
+			fileName="${sys:APP_LOG_ROOT}/${PROJECT}-error-${date:yyyy-MM-dd}.log"
+			filePattern="${sys:APP_LOG_ROOT}/${PROJECT}-error-%d{yyyy-MM-dd}-%i.log">
+
+			<!-- Matches only ERROR level -->
+			<LevelRangeFilter minLevel="WARN" maxLevel="WARN"
+				onMatch="ACCEPT" onMismatch="DENY" />
+
+			<PatternLayout pattern="${LOG_PATTERN}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="3KB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+
+		<RollingFile name="hibernateLog"
+			fileName="${sys:APP_LOG_ROOT}/${PROJECT}-database-${date:yyyy-MM-dd}.log"
+			filePattern="${sys:APP_LOG_ROOT}/${PROJECT}-database-%d{yyyy-MM-dd}-%i.log">
+
+			<LevelRangeFilter minLevel="ERROR" maxLevel="ERROR"
+				onMatch="ACCEPT" onMismatch="DENY" />
+
+			<PatternLayout pattern="${LOG_PATTERN}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="3KB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+
+	</Appenders>
+
+	<Loggers>
+
+		<Logger name="com.notification" additivity="false">
+			<AppenderRef ref="debugLog" />
+			<AppenderRef ref="infoLog" />
+			<AppenderRef ref="errorLog" />
+			<AppenderRef ref="Console" />
+			<appender-ref ref="hibernateLog" />
+		</Logger>
+
+
+		<Root level="warn">
+			<AppenderRef ref="Console" />
+		</Root>
+
+	</Loggers>
+
+</Configuration>

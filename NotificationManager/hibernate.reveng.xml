@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-reverse-engineering PUBLIC "-//Hibernate/Hibernate Reverse Engineering DTD 3.0//EN" "http://hibernate.org/dtd/hibernate-reverse-engineering-3.0.dtd" >
+
+<hibernate-reverse-engineering>
+
+	<table-filter match-schema="test123" match-name=".*" />
+	<table catalog="test123" name="offers_table">
+		<column name="OFFERID"></column>
+		<column name="CREATE_DATE"></column>
+		<column name="CREATEDBY"></column>
+		<column name="STATUS"></column>
+		<column name="IMAGE_URL"></column>
+		<column name="CONTENT"></column>
+		<column name="MODIFIED_DATE"></column>
+		<column name="END_DATE"></column>
+		<column name="MODIFYBY"></column>
+		<column name="LONG_OFFER"></column>
+		<column name="START_DATE"></column>
+		<column name="USERTYPE"></column>
+		<column name="OFFER_NAME"></column>
+		<column name="SHORT_OFFER"></column>
+		<column name="LOGO_URL"></column>
+	</table>
+	<table catalog="test123" name="push_notification_master">
+		<column name="PN_ID"></column>
+		<column name="PN_FROM"></column>
+		<column name="MODIFIED_BY"></column>
+		<column name="MESSAGE"></column>
+		<column name="IMAGE"></column>
+		<column name="CREATED_BY"></column>
+		<column name="PN_TO"></column>
+		<column name="CREATED_DATE_TIME"></column>
+		<column name="MODIFIED_DATE_TIME"></column>
+		<column name="PN_TITLE"></column>
+	</table>
+	<table catalog="test123" name="push_notification_tracker">
+		<column name="ID"></column>
+		<column name="IMAGE"></column>
+		<column name="MESSAGE"></column>
+		<column name="PN_TITLE"></column>
+		<column name="DEVICEID"></column>
+		<column name="MODIFIED_BY"></column>
+		<column name="CREATED_BY"></column>
+		<column name="PN_TO"></column>
+		<column name="PN_SENT_STATUS"></column>
+		<column name="CREATED_DATE_TIME"></column>
+		<column name="MODIFIED_DATE_TIME"></column>
+		<column name="REMARK"></column>
+		<column name="NOTIFICATION_TYPE_ID"></column>
+	</table>
+</hibernate-reverse-engineering>
