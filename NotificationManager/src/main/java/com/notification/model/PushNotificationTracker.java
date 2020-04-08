@@ -29,7 +29,7 @@ public class PushNotificationTracker
 	public void setPn_type(String pn_type) {
 		this.pn_type = pn_type;
 	}
-
+	 private String template;
 	@Column(name = "PN_TYPE")
 	private String pn_type;
 	
@@ -202,5 +202,13 @@ public class PushNotificationTracker
 
 	public void setNotification_type_id(Long notification_type_id) {
 		this.notification_type_id = notification_type_id;
+	}
+
+	public String getTemplate() {
+		return template;
+	}
+
+	public void setTemplate(String template) {
+		this.template = template;
 	}
 }

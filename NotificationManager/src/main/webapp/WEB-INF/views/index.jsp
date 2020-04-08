@@ -33,7 +33,7 @@ function validateOption()
 	 	 document.getElementById("validtype").innerHTML="please select notification type ";
 	 	 return false;
 	 }
-	 return false;
+	 return true;
 }
 function checkForm(){
     var e=document.getElementById("selectany").value;//alert(e);
@@ -221,9 +221,9 @@ button {
 			</div>
 			</div>
 			<div class="form-group row" >
-				<div class="col-sm-10">
+				<div class="col-sm-10">template
 					Select Image File: 
-					<form:input path="image" type="file" />
+					<form:input path="template" type="file" />
 				</div>
 			</div>
 			<div>
