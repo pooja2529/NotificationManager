@@ -146,7 +146,7 @@ public class PushNotificationController
 
 		@RequestMapping("/addNotification")
 		public ModelAndView addNotification(@ModelAttribute("notification") PushNotificationTracker notification,
-				@RequestParam("image") MultipartFile image,@RequestParam("image") MultipartFile template)
+				@RequestParam("image") MultipartFile image,@RequestParam("template") MultipartFile template)
 		{
 			System.out.println("inside addnotification");
 			ModelAndView mv=new ModelAndView("index");
