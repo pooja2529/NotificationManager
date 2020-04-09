@@ -93,11 +93,12 @@ public class PushNotificationTracker
 
 	@Override
 	public String toString() {
-		return "PushNotificationTracker [id=" + id + ", pn_type=" + pn_type + ", message=" + message + ", pn_title="
-				+ pn_title + ", image=" + image + ", pn_to=" + pn_to + ", device_id=" + device_id + ", created_by="
-				+ created_by + ", createddatetime=" + createddatetime + ", modifiedby=" + modifiedby
-				+ ", modifieddatetime=" + modifieddatetime + ", pn_sent_status=" + pn_sent_status + ", remark=" + remark
-				+ ", bitlyurl=" + bitlyurl + ", notification_type_id=" + notification_type_id + "]";
+		return "PushNotificationTracker [id=" + id + ", template=" + template + ", pn_type=" + pn_type + ", message="
+				+ message + ", pn_title=" + pn_title + ", image=" + image + ", pn_to=" + pn_to + ", device_id="
+				+ device_id + ", created_by=" + created_by + ", createddatetime=" + createddatetime + ", modifiedby="
+				+ modifiedby + ", modifieddatetime=" + modifieddatetime + ", pn_sent_status=" + pn_sent_status
+				+ ", remark=" + remark + ", bitlyurl=" + bitlyurl + ", notification_type_id=" + notification_type_id
+				+ "]";
 	}
 
 	public int getId() {

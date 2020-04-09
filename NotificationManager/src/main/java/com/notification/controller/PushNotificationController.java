@@ -17,6 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,9 +48,8 @@ import com.notification.service.PushNotificationTrackerService;
 
 @RestController
 @RequestMapping("/Communication")
-public class PushNotificationController 
-{
-	@Autowired 
+public class PushNotificationController {
+	@Autowired
 	PushNotificationMasterService notificationService;
 
 	@Autowired
@@ -59,11 +61,12 @@ public class PushNotificationController
 	@Autowired
 	HttpServletRequest request;
 
-	private static String UPLOADED_FOLDER = "D:\\spring\\video\\";
+	// private static String UPLOADED_FOLDER = "D:\\spring\\video\\";
 
 	@InitBinder
 	public void setAllowedFields(WebDataBinder dataBinder) {
-		dataBinder.setDisallowedFields("image");
+		dataBinder.setDisallowedFields("image", "template");
+		// dataBinder.setDisallowedFields("template");
 	}
 
 	@RequestMapping("/")
@@ -72,11 +75,8 @@ public class PushNotificationController
 		return new ModelAndView("index");
 	}
 
-
-
 	@RequestMapping(value = "downloadfile")
-	public void downloadExcel(HttpServletResponse response) 
-	{
+	public void downloadExcel(HttpServletResponse response) {
 
 		String fileName = "LangList.csv";
 		response.setHeader("Content-type", "application/octet-stream");
@@ -85,20 +85,20 @@ public class PushNotificationController
 		response.setHeader("Expires", "0");
 		CSVPrinter csvFilePrinter = null;
 		try {
-			csvFilePrinter = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT.withHeader("Sr No.", "Template").withIgnoreHeaderCase());
+			csvFilePrinter = new CSVPrinter(response.getWriter(),
+					CSVFormat.DEFAULT.withHeader("Sr No.", "Template").withIgnoreHeaderCase());
 
 			csvFilePrinter.flush();
 
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			//logger.error(e+"At downloading excel by id ");
-		} 
+			// logger.error(e+"At downloading excel by id ");
+		}
 
 	}
+
 	@RequestMapping(value = "download")
-	public void downloadExcelById(Model model,String paramCode, HttpServletResponse response) 
-	{
+	public void downloadExcelById(Model model, String paramCode, HttpServletResponse response) {
 
 		String fileName = "ContactList.csv";
 		response.setHeader("Content-type", "application/octet-stream");
@@ -107,100 +107,101 @@ public class PushNotificationController
 		response.setHeader("Expires", "0");
 		CSVPrinter csvFilePrinter = null;
 		try {
-			csvFilePrinter = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT.withHeader("Sr No.", "Mobile").withIgnoreHeaderCase());
+			csvFilePrinter = new CSVPrinter(response.getWriter(),
+					CSVFormat.DEFAULT.withHeader("Sr No.", "Mobile").withIgnoreHeaderCase());
 
 			csvFilePrinter.flush();
 
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			//logger.error(e+"At downloading excel by id ");
-		} 
+			// logger.error(e+"At downloading excel by id ");
+		}
 
 	}
+
 	@RequestMapping("/addBulkNotification")
-	public ModelAndView sendNotification(@ModelAttribute("notification") PushNotificationTracker notification,@RequestParam("image") MultipartFile file,Model model) throws IOException
-	{
+	public ModelAndView sendNotification(@ModelAttribute("notification") PushNotificationTracker notification,
+			@RequestParam("image") MultipartFile file, @RequestParam("template") MultipartFile template, Model model)
+			throws IOException {
 
-		ModelAndView mv=new ModelAndView("index");
-		if (file.isEmpty()) {
-			model.addAttribute("message", "Please select a CSV file to upload.");
-			model.addAttribute("status", false);
-		} else {
-			String splitBy = ",";
-			String imagefilename = file.getOriginalFilename();
-			System.out.println(imagefilename);
-			BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\Dambhare\\Downloads\\"+imagefilename));
-			String line = br.readLine();
-			while((line = br.readLine()) != null){
-				String[] b = line.split(splitBy);
-				// System.out.println(b[0]);
-				notification.setPn_to(b[1]);
-				notificationTrackService.addNotification(notification);
+		ModelAndView mv = new ModelAndView("index");
+		try {
 
-			}
-		}
-			return mv;
-
-		}
-
-		@RequestMapping("/addNotification")
-		public ModelAndView addNotification(@ModelAttribute("notification") PushNotificationTracker notification,
-				@RequestParam("image") MultipartFile image,@RequestParam("template") MultipartFile template)
-		{
-			System.out.println("inside addnotification");
-			ModelAndView mv=new ModelAndView("index");
-			try {
-				String imagefilename = image.getOriginalFilename();
-				//Path logopath = Paths.get(imagefilename);
-				byte[] bytes = image.getBytes();
-				String imageurl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/content/").path(imagefilename)
-						.toUriString();
-				ServletContext servletContext1 = request.getServletContext();
-				String contextlogopath = servletContext1.getRealPath("/");
-				//String imgresult = URLDecoder.decode(imagefilename, "UTF-8");
-				Path conimgpath = Paths.get(contextlogopath + "/content/" + imagefilename);
-				Files.write(conimgpath, bytes);
-				notification.setImage(imageurl);
-				
-				String templatefilename = template.getOriginalFilename();
-				//Path logopath = Paths.get(imagefilename);
-				byte[] bytes11 = template.getBytes();
-				String imageurl1 = ServletUriComponentsBuilder.fromCurrentContextPath().path("/content/").path(imagefilename)
-						.toUriString();
-				ServletContext servletContext = request.getServletContext();
-				String contextlogopath1 = servletContext.getRealPath("/");
-				//String imgresult = URLDecoder.decode(imagefilename, "UTF-8");
-				Path conimgpath1 = Paths.get(contextlogopath1 + "/content/" + templatefilename);
-				Files.write(conimgpath1, bytes11);
-				notification.setImage(imageurl1);
-				mv.addObject("msg","success");
-				notificationTrackService.addNotification(notification);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			return mv;
-
+			
+			  BufferedReader br,br1=null; if (file.isEmpty()) {
+			  model.addAttribute("message", "Please select a CSV file to upload.");
+			  model.addAttribute("status", false); } else { String splitBy = ","; String
+			  imagefilename = file.getOriginalFilename();
+			  System.out.println(imagefilename); br = new BufferedReader(new
+			  FileReader("C:\\Users\\Dambhare\\Downloads\\"+imagefilename));
+			  
+			  String imagefilename1 = template.getOriginalFilename();
+			  System.out.println(imagefilename1); br1 = new BufferedReader(new
+			  FileReader("C:\\Users\\Dambhare\\Downloads\\"+imagefilename1)); String line =
+			  br.readLine();
+			  
+			  String line1 = br1.readLine(); while((line = br.readLine()) != null &&
+			  (line1=br1.readLine())!=null){ String[] b = line.split(splitBy); String[]
+			  b1=line1.split(splitBy); // System.out.println(b[0]);
+			  notification.setPn_to(b[1]); System.out.println("mobile number is "+b[1] +"template is "+b1[1]);
+			  notification.setMessage(b1[1]);
+			  notificationTrackService.addNotification(notification);
+			  
+			  } br.close(); br1.close();
+			  
+			  }
+			  
+			  } catch (Exception e) {
 		}
 
-		@SuppressWarnings({ "rawtypes", "static-access", "unchecked" })
-		public @ResponseBody ResponseEntity sendSimpleSms(@PathVariable("pn_id")int pn_id,List<String> userDeviceIdKey,PushNotificationTracker track)
-		{
-			try {
-				PushNotificationMaster master=notificationService.getPushNotification(pn_id);
-				track.setPn_title(master.getPn_title());
-				track.setMessage(master.getMessage());
-				track.setImage(master.getImage());
-				track.setPn_sent_status("pn");
-				notificationTrackService.addNotification(track);
-				pushService.pushFCMNotification(userDeviceIdKey);
-			} catch (Exception e) {
-				//e.printStackTrace();
-				return new ResponseEntity(new CustomErrorType("Fail","Error....please check your code.."+e),HttpStatus.OK);
-			}
-			return new ResponseEntity(new CustomErrorType("Success","Push Notifications sent!!"),HttpStatus.OK);
+		return mv;
 
-		}
 	}
+
+	@RequestMapping("/addNotification")
+	public ModelAndView addNotification(@ModelAttribute("notification") PushNotificationTracker notification,
+			@RequestParam("image") MultipartFile image) {
+		System.out.println("inside addnotification");
+		ModelAndView mv = new ModelAndView("index");
+		try {
+			String imagefilename = image.getOriginalFilename();
+			// Path logopath = Paths.get(imagefilename);
+			byte[] bytes = image.getBytes();
+			String imageurl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/content/").path(imagefilename)
+					.toUriString();
+			ServletContext servletContext1 = request.getServletContext();
+			String contextlogopath = servletContext1.getRealPath("/");
+			// String imgresult = URLDecoder.decode(imagefilename, "UTF-8");
+			Path conimgpath = Paths.get(contextlogopath + "/content/" + imagefilename);
+			Files.write(conimgpath, bytes);
+			notification.setImage(imageurl);
+			notificationTrackService.addNotification(notification);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return mv;
+
+	}
+
+	@SuppressWarnings({ "rawtypes", "static-access", "unchecked" })
+	public @ResponseBody ResponseEntity sendSimpleSms(@PathVariable("pn_id") int pn_id, List<String> userDeviceIdKey,
+			PushNotificationTracker track) {
+		try {
+			PushNotificationMaster master = notificationService.getPushNotification(pn_id);
+			track.setPn_title(master.getPn_title());
+			track.setMessage(master.getMessage());
+			track.setImage(master.getImage());
+			track.setPn_sent_status("pn");
+			notificationTrackService.addNotification(track);
+			pushService.pushFCMNotification(userDeviceIdKey);
+		} catch (Exception e) {
+			// e.printStackTrace();
+			return new ResponseEntity(new CustomErrorType("Fail", "Error....please check your code.." + e),
+					HttpStatus.OK);
+		}
+		return new ResponseEntity(new CustomErrorType("Success", "Push Notifications sent!!"), HttpStatus.OK);
+
+	}
+}
