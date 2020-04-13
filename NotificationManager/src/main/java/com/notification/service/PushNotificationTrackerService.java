@@ -14,8 +14,9 @@ public class PushNotificationTrackerService {
 	public void addNotification(PushNotificationTracker track) {
 		// TODO Auto-generated method stub
 		trackrepo.save(track);
+		
 	}
 
-	
+
 
 }

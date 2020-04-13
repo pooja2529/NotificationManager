@@ -1,10 +1,10 @@
 package com.notification.controller;
 
 import java.io.BufferedReader;
+
+
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Writer;
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,26 +17,20 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.notification.model.PushNotificationMaster;
@@ -78,15 +72,21 @@ public class PushNotificationController {
 	@RequestMapping(value = "downloadfile")
 	public void downloadExcel(HttpServletResponse response) {
 
-		String fileName = "LangList.csv";
-		response.setHeader("Content-type", "application/octet-stream");
+		String fileName = "LangList.xls";
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("text/csv; charset=UTF-8");
+		//response.setHeader("Content-type", "application/octet-stream");
 		response.setHeader("Content-disposition", "attachment;filename=" + fileName);
 		response.setHeader("Cache-Control", "no-store, no-cache, no-transform, must-revalidate, private");
 		response.setHeader("Expires", "0");
 		CSVPrinter csvFilePrinter = null;
 		try {
+
 			csvFilePrinter = new CSVPrinter(response.getWriter(),
 					CSVFormat.DEFAULT.withHeader("Sr No.", "Template").withIgnoreHeaderCase());
+
+			//csvFilePrinter = new CSVPrinter(response.getWriter(),
+			//CSVFormat.DEFAULT.withHeader("Sr No.", "Template").withIgnoreHeaderCase());
 
 			csvFilePrinter.flush();
 
@@ -122,36 +122,66 @@ public class PushNotificationController {
 	@RequestMapping("/addBulkNotification")
 	public ModelAndView sendNotification(@ModelAttribute("notification") PushNotificationTracker notification,
 			@RequestParam("image") MultipartFile file, @RequestParam("template") MultipartFile template, Model model)
-			throws IOException {
+					throws IOException {
 
 		ModelAndView mv = new ModelAndView("index");
 		try {
 
-			
-			  BufferedReader br,br1=null; if (file.isEmpty()) {
-			  model.addAttribute("message", "Please select a CSV file to upload.");
-			  model.addAttribute("status", false); } else { String splitBy = ","; String
-			  imagefilename = file.getOriginalFilename();
-			  System.out.println(imagefilename); br = new BufferedReader(new
-			  FileReader("C:\\Users\\Dambhare\\Downloads\\"+imagefilename));
-			  
-			  String imagefilename1 = template.getOriginalFilename();
-			  System.out.println(imagefilename1); br1 = new BufferedReader(new
-			  FileReader("C:\\Users\\Dambhare\\Downloads\\"+imagefilename1)); String line =
-			  br.readLine();
-			  
-			  String line1 = br1.readLine(); while((line = br.readLine()) != null &&
-			  (line1=br1.readLine())!=null){ String[] b = line.split(splitBy); String[]
-			  b1=line1.split(splitBy); // System.out.println(b[0]);
-			  notification.setPn_to(b[1]); System.out.println("mobile number is "+b[1] +"template is "+b1[1]);
-			  notification.setMessage(b1[1]);
-			  notificationTrackService.addNotification(notification);
-			  
-			  } br.close(); br1.close();
-			  
-			  }
-			  
-			  } catch (Exception e) {
+
+			BufferedReader br,br1=null; if (file.isEmpty()) {
+				model.addAttribute("message", "Please select a CSV file to upload.");
+				model.addAttribute("status", false); } else { 
+					String splitBy = ","; String
+					imagefilename = file.getOriginalFilename();
+					System.out.println(imagefilename); 
+					br = new BufferedReader(new FileReader("C:\\Users\\Dambhare\\Downloads\\"+imagefilename));
+
+
+					String imagefilename1 = template.getOriginalFilename();
+					System.out.println(imagefilename1); 
+					br1 = new BufferedReader(new FileReader("C:\\Users\\Dambhare\\Downloads\\"+imagefilename1)); 
+					ArrayList<String> contact = new ArrayList<>();
+					ArrayList<String> msg = new ArrayList<>();
+
+
+					String line = br.readLine();
+
+					String line1 = br1.readLine();
+
+
+
+					while((line = br.readLine()) != null && (line1=br1.readLine())!=null)
+					{
+						String[] b = line.split(splitBy); 
+						String[] b1=line1.split(splitBy);
+						if (b.length != 2 && b1.length!=2) { // Skip any "weird" (e.g., empty) line
+							continue;
+						}
+
+						contact.add(b[1]);
+						msg.add(b1[1]);
+					}
+					for (int i = 0; i < contact.size(); i++) {
+						for(i=0;i<msg.size();i++)
+						{
+							
+							PushNotificationTracker track=new PushNotificationTracker();
+							track.setPn_to(contact.get(i)); 
+							track.setMessage(msg.get(i));
+							System.out.println(contact+""+msg);
+							notificationTrackService.addNotification(track);
+
+						}
+						// System.out.println(IDs.get(i) + "\t" + names.get(i));
+					}
+					
+					// System.out.println(b[0]);
+					// notification.setPn_to(b[1]); System.out.println("mobile number is "+b[1] +"template is "+b1[1]);
+					// notification.setMessage(b1[1]);
+					br.close(); br1.close();			  
+				}
+
+		} catch (Exception e) {
 		}
 
 		return mv;
