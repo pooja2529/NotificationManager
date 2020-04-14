@@ -1,6 +1,7 @@
 package com.notification.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,5 +33,9 @@ NotificationRepository notificationRepository;
 		
 	}
 	
-	
+	public List<String> searchContent()
+	{
+		List<String> contentlist=notificationRepository.findContent();
+		return contentlist;
+	}
 }

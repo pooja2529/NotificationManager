@@ -35,4 +35,9 @@ public class UserService
 	}
 
 
+	public List<String> searchMob()
+	{
+		List<String> moblist=userRepo.findMobile();
+		return moblist;
+	}
 }

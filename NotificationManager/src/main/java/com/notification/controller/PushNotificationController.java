@@ -36,9 +36,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.notification.model.PushNotificationMaster;
 import com.notification.model.PushNotificationTracker;
 import com.notification.service.CustomErrorType;
+import com.notification.service.NotificationService;
 import com.notification.service.PushNotificationMasterService;
 import com.notification.service.PushNotificationService;
 import com.notification.service.PushNotificationTrackerService;
+import com.notification.service.UserService;
 
 @RestController
 @RequestMapping("/Communication")
@@ -55,6 +57,11 @@ public class PushNotificationController {
 	@Autowired
 	HttpServletRequest request;
 
+	@Autowired
+	NotificationService masterService;
+
+	@Autowired
+	UserService userservice;
 	// private static String UPLOADED_FOLDER = "D:\\spring\\video\\";
 
 	@InitBinder
@@ -140,16 +147,11 @@ public class PushNotificationController {
 					String imagefilename1 = template.getOriginalFilename();
 					System.out.println(imagefilename1); 
 					br1 = new BufferedReader(new FileReader("C:\\Users\\Dambhare\\Downloads\\"+imagefilename1)); 
-					ArrayList<String> contact = new ArrayList<>();
-					ArrayList<String> msg = new ArrayList<>();
-
+					ArrayList<String> contactlist = new ArrayList<>();
+					ArrayList<String> msglist = new ArrayList<>();
 
 					String line = br.readLine();
-
 					String line1 = br1.readLine();
-
-
-
 					while((line = br.readLine()) != null && (line1=br1.readLine())!=null)
 					{
 						String[] b = line.split(splitBy); 
@@ -158,26 +160,47 @@ public class PushNotificationController {
 							continue;
 						}
 
-						contact.add(b[1]);
-						msg.add(b1[1]);
+						contactlist.add(b[1]);
+						msglist.add(b1[1]);
 					}
-					for (int i = 0; i < contact.size(); i++) {
-						for(i=0;i<msg.size();i++)
+					List<String> moblist=userservice.searchMob();
+					System.out.println("mobile list"+moblist); 
+
+					List<String> contentlist=masterService.searchContent();
+					System.out.println("Content from database"+contentlist);
+
+					if(moblist.containsAll(contactlist))
+					{
+						System.out.println("match");
+						if(contentlist.containsAll(msglist))
 						{
-							
-							PushNotificationTracker track=new PushNotificationTracker();
-							track.setPn_to(contact.get(i)); 
-							track.setMessage(msg.get(i));
-							System.out.println(contact+""+msg);
-							notificationTrackService.addNotification(track);
+							System.out.println("content match");
+							for (int i = 0; i < contactlist.size(); i++) {
+								for(i=0;i<msglist.size();i++)
+								{
+									PushNotificationTracker track=new PushNotificationTracker();
+									track.setPn_to(contactlist.get(i)); 
+									track.setMessage(msglist.get(i));
+									System.out.println(contactlist+""+msglist);
+									notificationTrackService.addNotification(track);
+
+								}
+								// System.out.println(IDs.get(i) + "\t" + names.get(i));
+							}
 
 						}
-						// System.out.println(IDs.get(i) + "\t" + names.get(i));
+						else
+						{
+							System.out.println("not match content");
+							mv.addObject("conmsg","message template not matched with database data" );
+						}
 					}
-					
-					// System.out.println(b[0]);
-					// notification.setPn_to(b[1]); System.out.println("mobile number is "+b[1] +"template is "+b1[1]);
-					// notification.setMessage(b1[1]);
+					else
+					{
+						System.out.println("not match");
+						mv.addObject("mobmsg", "contact list not matched with database data  ");
+					}
+
 					br.close(); br1.close();			  
 				}
 

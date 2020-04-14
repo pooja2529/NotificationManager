@@ -1,5 +1,7 @@
 package com.notification.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,10 @@ public class PushNotificationTrackerService {
 		
 	}
 
-
+public List<PushNotificationTracker> searchAll()
+{
+	List<PushNotificationTracker> tracklist=trackrepo.getMobileAndMessageOnly();
+	return tracklist;
+}
 
 }

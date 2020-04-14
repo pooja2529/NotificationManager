@@ -147,6 +147,7 @@ button {
 			</div>
 		</form:form>
 		</div>
+		
 		 <div class="col-sm-6">
 		<h4 style="font: bold;">Bulk Communication</h4>
 		<form:form name="bulknotification"  modelAttribute="notification" onsubmit="return validateOption()" action="addBulkNotification" enctype="multipart/form-data" acceptCharset="UTF-8">
@@ -174,6 +175,7 @@ button {
 					<form:input path="image" type="file" />
 				</div>
 			</div>
+			<h5 style="color: red;">${mobmsg }</h5>
 			<div class="form-group row" >
 				<div class="col-sm-10">
 					<form:select path="pn_type" class="form-control" id="ntype"  >
@@ -226,6 +228,7 @@ button {
 					<form:input path="template" type="file" />
 				</div>
 			</div>
+			<h5 style="color: red;">${conmsg }</h5>
 			<div>
 				<button type="submit" id="validation">Send Now</button>
 					<!-- 	<button type="submit" id="validation">Send Later</button> -->
