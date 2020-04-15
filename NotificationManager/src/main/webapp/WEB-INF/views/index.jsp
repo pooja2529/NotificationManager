@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%-- <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+ --%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,6 +21,7 @@ function showSelectDiv(divId, element)
 {
     document.getElementById(divId).style.display = element.value == 1 ? 'block' : 'none';
 }
+
 </script>
 <script type="text/javascript">
 function validateOption()
@@ -62,6 +65,7 @@ function checkForm(){
 {
  display: none;
 }
+
 #hidden_div {
     display: none;
 }
@@ -77,6 +81,7 @@ button {
 	color: white;
 	background: green;
 }
+
 </style>
 <meta charset="UTF-8">
 <title>Notification</title>
@@ -153,17 +158,22 @@ button {
 		<form:form name="bulknotification"  modelAttribute="notification" onsubmit="return validateOption()" action="addBulkNotification" enctype="multipart/form-data" acceptCharset="UTF-8">
 		<!-- <div class="form-group row"> -->
 				<div class="col-sm-10">
-					<form:select path="pn_type" class="form-control" id="select" onchange="showSelectDiv('hidden_selectDiv', this)" >
+					<form:select path="pn_type" class="form-control" id="select"  onchange="showSelectDiv('hidden_selectDiv', this)" >
 						<form:option value="">Excel file</form:option>
 						<form:option value="1">Upload Excel file</form:option>
-						<form:option value="pn">Select contacts</form:option>
+						<form:option value="2">Select contacts</form:option>
 					</form:select>
 					<h6 style="color: red;">
 						<span id="validselect"></span>
 					</h6>
 				</div>
 			<!-- </div> -->
-			<div class="form-group row">
+					<div id="showMe"
+						style="height: 100px; width: 400px; border: solid 2px orange; overflow: scroll;  overflow-y: scroll;">
+						${moblist}
+					</div>
+
+					<div class="form-group row">
 			<div class="col-sm-10">
 			<h5 style="font: bold;">please upload user data excel file only</h5>
 			<a href="download"><h5 style="font: bold; color: blue;">Download sample template</h5></a>

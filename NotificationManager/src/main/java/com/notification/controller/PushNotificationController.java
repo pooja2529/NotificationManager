@@ -165,7 +165,7 @@ public class PushNotificationController {
 					}
 					List<String> moblist=userservice.searchMob();
 					System.out.println("mobile list"+moblist); 
-
+					mv.addObject("moblist", moblist);
 					List<String> contentlist=masterService.searchContent();
 					System.out.println("Content from database"+contentlist);
 
