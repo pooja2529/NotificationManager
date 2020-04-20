@@ -1,5 +1,6 @@
 package com.notification.model;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -22,6 +23,7 @@ public class PushNotificationTracker
 	@Column(name = "ID")
 	private int id;
 
+	private String[] selected;
 	public String getPn_type() {
 		return pn_type;
 	}
@@ -55,6 +57,17 @@ public class PushNotificationTracker
 	@Column(name="CREATED_DATE_TIME")
 	private Date createddatetime = new java.sql.Date(new java.util.Date().getTime());
 
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="SEND_AFTER")
+	private Date sendafter = new java.sql.Date(new java.util.Date().getTime());
+	
+	public Date getSendafter() {
+		return sendafter;
+	}
+
+	public void setSendafter(Date sendafter) {
+		this.sendafter = sendafter;
+	}
 	@Column(name = "MODIFIEDBY")
 	private int modifiedby;
 
@@ -88,17 +101,14 @@ public class PushNotificationTracker
 	}
 
 	
-
-	
-
 	@Override
 	public String toString() {
-		return "PushNotificationTracker [id=" + id + ", template=" + template + ", pn_type=" + pn_type + ", message="
-				+ message + ", pn_title=" + pn_title + ", image=" + image + ", pn_to=" + pn_to + ", device_id="
-				+ device_id + ", created_by=" + created_by + ", createddatetime=" + createddatetime + ", modifiedby="
-				+ modifiedby + ", modifieddatetime=" + modifieddatetime + ", pn_sent_status=" + pn_sent_status
-				+ ", remark=" + remark + ", bitlyurl=" + bitlyurl + ", notification_type_id=" + notification_type_id
-				+ "]";
+		return "PushNotificationTracker [id=" + id + ", selected=" + Arrays.toString(selected) + ", template="
+				+ template + ", pn_type=" + pn_type + ", message=" + message + ", pn_title=" + pn_title + ", image="
+				+ image + ", pn_to=" + pn_to + ", device_id=" + device_id + ", created_by=" + created_by
+				+ ", createddatetime=" + createddatetime + ", sendafter=" + sendafter + ", modifiedby=" + modifiedby
+				+ ", modifieddatetime=" + modifieddatetime + ", pn_sent_status=" + pn_sent_status + ", remark=" + remark
+				+ ", bitlyurl=" + bitlyurl + ", notification_type_id=" + notification_type_id + "]";
 	}
 
 	public int getId() {
@@ -211,5 +221,13 @@ public class PushNotificationTracker
 
 	public void setTemplate(String template) {
 		this.template = template;
+	}
+
+	public String[] getSelected() {
+		return selected;
+	}
+
+	public void setSelected(String[] selected) {
+		this.selected = selected;
 	}
 }

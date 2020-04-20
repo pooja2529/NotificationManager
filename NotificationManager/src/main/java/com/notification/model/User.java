@@ -32,7 +32,7 @@ public class User
 	@Override
 	public String toString() {
 		return "User [userid=" + userid + ", firstname=" + firstname + ", lastname=" + lastname + ", mobilenumber="
-				+ mobilenumber + ", email=" + email + ", deviceid=" + deviceid + "]";
+				+ mobilenumber + ", email=" + email + ", deviceid=" + deviceid + ", lang=" + lang + "]";
 	}
 	public int getUserid() {
 		return userid;
@@ -71,10 +71,18 @@ public class User
 	public void setDeviceid(String deviceid) {
 		this.deviceid = deviceid;
 	}
+	public String getLang() {
+		return lang;
+	}
+
+
+	public void setLang(String lang) {
+		this.lang = lang;
+	}
 	private String firstname;
 	private String lastname;
 	private String mobilenumber;
 	private String email;
 	private String deviceid;
-
+	private String lang;
 }

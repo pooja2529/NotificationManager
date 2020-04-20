@@ -34,6 +34,10 @@ public class UserService
 		return userRepo.findByUserIds(uids);
 	}
 
+	public List<String> getDeviceId(List<String> moblist) {
+		// TODO Auto-generated method stub
+		return userRepo.findDeviceId(moblist);
+	}
 
 	public List<String> searchMob()
 	{

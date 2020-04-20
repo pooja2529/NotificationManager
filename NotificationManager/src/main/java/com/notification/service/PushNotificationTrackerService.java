@@ -25,4 +25,10 @@ public List<PushNotificationTracker> searchAll()
 	return tracklist;
 }
 
+public List<String> getAll()
+{
+	return trackrepo.fetch();
+	
+}
+
 }

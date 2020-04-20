@@ -48,7 +48,7 @@ public class NotificationController
 	SmsController smsService;
 
 	@Autowired
-	PushNotificationController pushService;
+	PushController pushService;
 
 	@Autowired
 	PushNotificationMasterService pushmasterservice;

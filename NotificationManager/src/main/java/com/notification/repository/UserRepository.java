@@ -21,5 +21,8 @@ public interface UserRepository extends CrudRepository<User, Integer>{
 	
 	@Query(value = "select mobilenumber from user",nativeQuery = true)
 	List<String> findMobile();
+	
+	@Query(value = "select deviceid from user where mobilenumber IN (:mobilenumber)",nativeQuery = true)
+	List<String> findDeviceId(@Param("mobilenumber")List<String> mobilenumber);
 
 }

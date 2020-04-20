@@ -38,4 +38,9 @@ NotificationRepository notificationRepository;
 		List<String> contentlist=notificationRepository.findContent();
 		return contentlist;
 	}
+	
+	public List<String> findSingleContent()
+	{
+		return notificationRepository.findSingleContent();
+	}
 }

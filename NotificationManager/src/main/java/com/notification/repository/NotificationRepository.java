@@ -9,7 +9,10 @@ import com.notification.model.NotificationMaster;
 
 public interface NotificationRepository extends JpaRepository<NotificationMaster, Integer>{
 
-	@Query(value = "select content from notification_master",nativeQuery = true)
+	@Query(value = "select content from notification_master ",nativeQuery = true)
 List<String> findContent();
+	
+	@Query(value = "select content from notification_master where templateid=2",nativeQuery = true)
+	List<String> findSingleContent();
 
 }

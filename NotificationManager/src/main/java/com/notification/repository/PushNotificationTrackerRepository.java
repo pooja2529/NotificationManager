@@ -14,4 +14,7 @@ public interface PushNotificationTrackerRepository extends CrudRepository<PushNo
 
 	 @Query(value = "select e.pn_to, e.message from PUSH_NOTIFICATION_TRACKER e",nativeQuery = true )
 	    List<PushNotificationTracker> getMobileAndMessageOnly();
+	 
+	 @Query(value = "SELECT p.pn_to FROM testdb.push_notification_tracker p WHERE p.CREATED_DATE_TIME >= DATE_SUB(NOW(),INTERVAL 15 MINUTE)",nativeQuery = true)
+	 public List<String> fetch();
 }
