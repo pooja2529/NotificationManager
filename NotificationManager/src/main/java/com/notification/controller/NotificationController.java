@@ -3,6 +3,7 @@ package com.notification.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,7 @@ public class NotificationController
 	@Autowired
 	PushNotificationMasterService pushmasterservice;
 
+		
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@PostMapping(value = "/verifyUser/")
 	public ResponseEntity<?> verifyNotification(@RequestBody  Notification notification,User user,EmailTracker emailTrack,SmsTracker track,PushNotificationTracker pushtrack) 

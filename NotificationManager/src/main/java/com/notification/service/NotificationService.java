@@ -39,8 +39,14 @@ NotificationRepository notificationRepository;
 		return contentlist;
 	}
 	
-	public List<String> findSingleContent()
+	public List<String> findSingleContent(int templateid)
 	{
-		return notificationRepository.findSingleContent();
+		return notificationRepository.findSingleContent(templateid);
+	}
+	
+	public List<NotificationMaster> findObjList()
+	{
+		return notificationRepository.findAll();
+		
 	}
 }

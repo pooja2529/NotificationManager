@@ -21,6 +21,12 @@
     
 
 <script type="text/javascript">
+$(document).ready(function() {
+    var personJson = $('#person');
+    
+    alert( '<a href="addBulkNotification">Please check invalid.csv file inside download folder for unregistered and invalid mobile numbers</a>');
+});
+
 $(function() {
 	  $('#datetimepicker1').datetimepicker();
 	});
@@ -29,30 +35,10 @@ function showDiv(divId, element)
     document.getElementById(divId).style.display = element.value == 1 ? 'block' : 'none';
 }
 
-function showSelectDiv()
+function showSelectDiv(divId, element)
 {
-	var x= document.getElementById("select");
-	
-	if(x.value === '1')
-		{
-		document.getElementById("hidden_selectDiv").style.display='none';
-		document.getElementById("showdiv").style.display='block';
-		
-		}
-	
-	if(x.value === '2')
-	{
-	document.getElementById("hidden_selectDiv").style.display='block';
-	document.getElementById("showdiv").style.display='none';
-	
-	}
-	if(x.value === '')
-		{
-		document.getElementById("validselect").innerHTML = "Please select atleast one option  ";
-		}
-	
-/*    document.getElementById(divId).style.display = element.value == 2 ? 'block' : 'none';
- */}
+	document.getElementById(divId).style.display = element.value == 1 ? 'block' : 'none';
+}
 function redirectOnClick(){
     document.location ='sendlater';
 }
@@ -193,21 +179,24 @@ button {
 		</div>
 		
 		 <div class="col-sm-6">
+		 ${sendafter } ${success }
 		<h4 style="font: bold;">Bulk Communication</h4>
 		<form:form name="bulknotification"  modelAttribute="notification"  action="addBulkNotification" enctype="multipart/form-data" acceptCharset="UTF-8">
 		<!-- <div class="form-group row"> -->
 				<div class="col-sm-10">
 				
-					<form:select path="pn_type" class="form-control" id="select"  onchange="showSelectDiv()" >
+					<form:select path="pn_type" class="form-control" id="select"  onchange="showSelectDiv('showdiv', this)" >
 						<form:option value="">Excel file</form:option>
 						<form:option value="1">Upload Excel file</form:option>
 					<form:option value="2">Select contacts</form:option>	
 					</form:select>
-					<h6 style="color: red;">${exterror } ${emptyerr } ${present }
+					        <input type="hidden" id="person" value="${mob }">     
+					
+					<h6 style="color: red;">${exterror }  ${mobsuccess } ${emptyerr } ${excelempty } ${present }
 						<span id="validselect"></span>
 					</h6>
 				</div>
-			<!-- </div> -->
+			<%-- <!-- </div> -->
 					<div id="hidden_selectDiv"
 						style="width:500px;height:100px;border:solid 1px grey;overflow:scroll;">
 					
@@ -217,7 +206,7 @@ button {
 
 						</c:forEach>
 						</ul>
-					</div>
+					</div> --%>
 
 					<div class="form-group row">
 			<div class="col-sm-10">
@@ -228,11 +217,23 @@ button {
 			<div class="form-group row" id="showdiv" >
 				<div class="col-sm-10">
 				
-					<form:input path="pn_to" class="custom-file-input"  type="file"/>
+					<form:input path="pn_to" class="custom-file-input"  type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
 				</div>
 			</div>
 			<h5 style="color: red;">${mobmsg }</h5>
-			
+			<div class="form-group row">
+				<div class="col-sm-10">
+					<form:select path="pn_type" name="ntype" class="form-control" id="selectany" >
+						<form:option value="">---Select Notification Type---</form:option>
+						<form:option value="1">IMAGE NOTIFICATION</form:option>
+						<form:option value="pn">PUSH NOTIFICATION</form:option>
+					</form:select>
+					<h6 style="color: red;">
+						<span id="validnotification"></span>
+					</h6>
+				</div>
+
+			</div>
 			<div class="form-group row">
 				<div class="col-sm-10">
 					<form:input type="text" path="image" class="form-control" id="mobselect"
@@ -274,7 +275,7 @@ button {
 			</div>
 			<h5 style="color: red;">${conmsg }</h5>
 			<div>
-				<button type="submit"  id="validation">Send Now</button>
+				<button type="submit"  id="validation" onclick="">Send Now</button>
 					 
 					<button type="button" id="schedular" data-toggle = "modal" data-target = ".bd-example-modal-sm" >Send Later</button>
 						<div class="modal fade bd-example-modal-sm" tabindex="-1"

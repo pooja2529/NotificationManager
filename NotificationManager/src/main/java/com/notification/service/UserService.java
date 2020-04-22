@@ -44,4 +44,8 @@ public class UserService
 		List<String> moblist=userRepo.findMobile();
 		return moblist;
 	}
+	public List<User> getAllUser()
+	{
+		return (List<User>) userRepo.findAll();
+	}
 }

@@ -1,15 +1,21 @@
 package com.notification.controller;
 
 import java.io.BufferedReader;
-
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +23,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.ui.Model;
@@ -29,9 +46,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.notification.model.NotificationMaster;
 import com.notification.model.PushNotificationTracker;
+import com.notification.model.User;
 import com.notification.service.NotificationService;
 import com.notification.service.PushNotificationMasterService;
 import com.notification.service.PushNotificationService;
@@ -61,21 +81,19 @@ public class PushNotificationController {
 
 	@Autowired
 	UserService userservice;
-	// private static String UPLOADED_FOLDER = "D:\\spring\\video\\";
 
 	@InitBinder
 	public void setAllowedFields(WebDataBinder dataBinder) {
-		dataBinder.setDisallowedFields("image", "template", "pn_to", "selected");
-		// dataBinder.setDisallowedFields("template");
+		dataBinder.setDisallowedFields("image", "template", "pn_to", "selected","sendafter");
 	}
 
 	@RequestMapping("/")
 	public ModelAndView index(Model model) {
 		ModelAndView mv = new ModelAndView("index");
 		model.addAttribute("notification", new PushNotificationTracker());
-		List<String> moblist = userservice.searchMob();
-		System.out.println("mobile list is" + moblist);
-		mv.addObject("moblist", moblist);
+		  List<String> moblist = userservice.searchMob();
+		  mv.addObject("moblist",moblist);
+		 
 		return mv;
 	}
 
@@ -122,7 +140,7 @@ public class PushNotificationController {
 		}
 
 	}
-
+	
 	@RequestMapping("/addNotification")
 	public ModelAndView addNotification(@ModelAttribute("notification") PushNotificationTracker notification,
 			@RequestParam(required = false, name = "image") MultipartFile image) {
@@ -151,26 +169,32 @@ public class PushNotificationController {
 	@Scheduled(cron = "0 0/1 * * * ?")
 	public void sendSchedular() throws IOException {
 		System.out.println("in schedular");
-		/*
-		 * List<String> SendAfterdata=notificationTrackService.getAll();
-		 * System.out.println(SendAfterdata);
-		 */
-		List<String> moblist = userservice.searchMob();
+
+		List<String> SendAfterdata=notificationTrackService.getAll();
+		System.out.println(SendAfterdata);
 		PushNotificationTracker push = new PushNotificationTracker();
+		List<String> moblist=userservice.searchMob();
 		List<String> userDeviceIdKey = userservice.getDeviceId(moblist);
+		Timestamp currentdatetime = new Timestamp(new Date().getTime());
+
 		System.out.println(userDeviceIdKey);
-		if (!moblist.isEmpty()) {
-			for (String p : moblist) {
-				if (push.getPn_sent_status().equalsIgnoreCase("P")) {
+		if (!SendAfterdata.isEmpty()) 
+		{
+			for (String p : SendAfterdata) 
+			{
+				if ( currentdatetime.equals(push.getSendafter())) 
+				{
 					try {
-						PushNotificationService.pushFCMNotification(userDeviceIdKey);
+						pushNotificationService.sendSimpleSms(masterService.getNotification(2).getNotificationId(),userDeviceIdKey,push);
+						push.setPn_sent_status("Y");
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
 			}
-		} else {
+		} else 
+		{
 			System.out.println("data is not in send after");
 		}
 	}
@@ -179,8 +203,8 @@ public class PushNotificationController {
 	public ModelAndView sendNotification(@ModelAttribute("notification") PushNotificationTracker notification,
 			@RequestParam(required = false, name = "selected") String[] selected,
 			@RequestParam(required = false, name = "pn_to") MultipartFile file,
-			@RequestParam("template") MultipartFile template) throws IOException {
-		ModelAndView mv = new ModelAndView("redirect:/Communication/");
+			@RequestParam(required = false,name = "template") MultipartFile template,RedirectAttributes rd) throws IOException {
+		ModelAndView mv = new ModelAndView("index");
 		try {
 			String contactfile = file.getOriginalFilename();
 			String contactfileext = com.google.common.io.Files.getFileExtension(contactfile);
@@ -192,109 +216,237 @@ public class PushNotificationController {
 
 			ArrayList<String> msglist = new ArrayList<String>();
 			ArrayList<String> contactlist = new ArrayList<String>();
-
+			
+			List<String> moblist = userservice.searchMob();
+			List<String> contentlist = masterService.searchContent();
+			System.out.println(moblist);
+			System.out.println(contentlist);
 			if (contactfileext.equalsIgnoreCase("csv") && templatefileext.equalsIgnoreCase("csv")) {
-				if (!file.isEmpty() && !template.isEmpty()) {
-					BufferedReader br = new BufferedReader(
-							new FileReader("C:\\Users\\Dambhare\\Downloads\\" + contactfile));
-					BufferedReader br1 = new BufferedReader(
-							new FileReader("C:\\Users\\Dambhare\\Downloads\\" + templatefile));
+				if (!file.isEmpty() && !template.isEmpty()) 
+				{
+					BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\Dambhare\\Downloads\\" + contactfile));
+					BufferedReader br1 = new BufferedReader(new FileReader("C:\\Users\\Dambhare\\Downloads\\" + templatefile));
 
 					String line = br.readLine();
 					String line1 = br1.readLine();
 
-					while ((line1 = br1.readLine()) != null && (line = br.readLine()) != null) {
+					while ((line1 = br1.readLine()) != null && (line = br.readLine()) != null) 
+					{
 						String[] b = line.split(splitBy);
 						String[] b1 = line1.split(splitBy);
-						if (b.length != 2 && b1.length != 2) { // Skip any "weird" (e.g., empty) line
+						if (b.length != 2 && b1.length != 2) 
+						{ // Skip any "weird" (e.g., empty) line
 							continue;
 						}
 						contactlist.add(b[1]);
 						msglist.add(b1[1]);
 					}
-
-					List<String> moblist = userservice.searchMob();
-					mv.addObject("moblist", moblist);
-					List<String> contentlist = masterService.searchContent();
-
-					if (moblist.containsAll(contactlist)) {
-						System.out.println("match");
-						if (contentlist.containsAll(msglist)) {
-							System.out.println("content match");
-							for (String contact : contentlist) {
-								for (String msg : msglist) {
-
-									PushNotificationTracker track = new PushNotificationTracker();
-									track.setPn_to(contact);
-									track.setMessage(msg);
-									track.setPn_sent_status("P");
-									notificationTrackService.addNotification(track);
-
+					for (int i=0;i<moblist.size();i++)
+					{
+						for(i=0;i<contentlist.size();i++) 
+						{
+							if(moblist.contains(moblist.get(i)))
+								{
+								
+													PushNotificationTracker track = new PushNotificationTracker();
+														track.setPn_to(contactlist.get(i)); 
+														track.setMessage(msglist.get(i)); 
+														track.setPn_sent_status("P");
+														track.setSendafter(null);
+														notificationTrackService.addNotification(track);
+														rd.addFlashAttribute("success", "Bulk Notification has been sent succesfully!!!!!!!!!!!!!! ");
+														
+										
+								
 								}
+								else
+								{ 
+								    FileWriter writer = new FileWriter("C:\\Users\\Dambhare\\Downloads\\Invalid.csv" );
+								    
+									List<String> templist=new ArrayList<>();
+									templist.add(msglist.get(i));
+								    String collect = templist.stream().collect(Collectors.joining(","));
+								    writer.write(collect);
+								    rd.addFlashAttribute("mob"," is not registered");
+								    writer.close();
+								    templist.clear();
+								}	
+						}
+					}
+					br.close();
+					br1.close();
+					}
+			
+				} 
+			else if (contactfileext.equalsIgnoreCase("xls") && templatefileext.equalsIgnoreCase("xls")) 
+			{
+				
+				FileInputStream fis = new FileInputStream("C:\\Users\\Dambhare\\Downloads\\" + contactfile);
+				FileInputStream fis1 = new FileInputStream("C:\\Users\\Dambhare\\Downloads\\" + templatefile);
+
+		        HSSFWorkbook workbook = new HSSFWorkbook(fis);
+		        HSSFWorkbook workbook1 = new HSSFWorkbook(fis1);
+
+		        HSSFSheet sheet = workbook.getSheetAt(0);
+		        HSSFSheet sheet1 = workbook1.getSheetAt(0);
+
+                Integer columnNo = 1;
+                
+                //output all not null values to the list
+                List<Cell> mobcells = new ArrayList<Cell>();
+                List<Cell> msgcells = new ArrayList<Cell>();
+                if (!file.isEmpty() && !template.isEmpty()) 
+				{
+                if (columnNo != null)
+                {
+                    for (Row row : sheet) {
+                    	Cell c = row.getCell(columnNo);
+                       if(c.getStringCellValue().equalsIgnoreCase("Mobile"))
+                       {
+                    	   continue;
+                       } 
+                       else {
+                          mobcells.add(c);
+                       }
+                    }
+                    for (Row row : sheet1) {
+                    	Cell c = row.getCell(columnNo);
+                       if(c.getStringCellValue().equalsIgnoreCase("Template"))
+                       {
+                    	   continue;
+                       } 
+                       else {
+                          msgcells.add(c);
+                       }
+                    }
+                }
+                for (Cell contact : mobcells)
+				{
+					for (Cell msg : msgcells) 
+						{
+						if(moblist.contains(contact.getStringCellValue()))
+							{
+							 PushNotificationTracker track = new PushNotificationTracker();
+							  track.setPn_to(contact.getStringCellValue()); 
+							  track.setMessage(msg.getStringCellValue()); 
+							  track.setPn_sent_status("P");
+							  notificationTrackService.addNotification(track);
+							  rd.addFlashAttribute("success", "Bulk Notification has been sent succesfully!!!!!!!!!!!!!! ");
+
 							}
-
-						} else {
-							System.out.println("not match content");
-							mv.addObject("conmsg", "message template not matched with database data");
-						}
-					} else {
-						System.out.println("not match");
-						mv.addObject("mobmsg", "contact list not matched with database data  ");
-					}
-
-				} else {
-					BufferedReader br1 = new BufferedReader(
-							new FileReader("C:\\Users\\Dambhare\\Downloads\\" + templatefile));
-
-					String line1 = br1.readLine();
-					while ((line1 = br1.readLine()) != null) {
-						String[] b1 = line1.split(splitBy);
-						if (b1.length != 2) { // Skip any "weird" (e.g., empty) line
-							continue;
-						}
-
-						msglist.add(b1[1]);
-					}
-
-					List<String> templist = Arrays.asList(selected);
-					List<String> userDeviceIdKey = userservice.getDeviceId(templist);
-					System.out.println(userDeviceIdKey);
-					if (!templist.isEmpty()) {
-						for (String p : templist) {
-							for (String msg : msglist) {
-								try {
-									PushNotificationService.pushFCMNotification(userDeviceIdKey);
-								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
+							else
+							{
+								rd.addFlashAttribute(contact.getStringCellValue() );
 							}
 						}
-					} else {
-						System.out.println("data is not in send after");
-					}
-					/*
-					 * for(String numbers:templist ) { for(String msg:msglist) {
-					 * 
-					 * PushNotificationTracker track=new PushNotificationTracker();
-					 * track.setPn_to(numbers); track.setMessage(msg);
-					 * notificationTrackService.addNotification(track);
-					 * 
-					 * 
-					 * } }
-					 */
-
 				}
-
-			} else if (contactfileext.equalsIgnoreCase("xls") && templatefileext.equalsIgnoreCase("xls")) {
-
+				}
+               
+                workbook.close();
+                workbook1.close();
 			} else if (contactfileext.equalsIgnoreCase("xlsx") && templatefileext.equalsIgnoreCase("xlsx")) {
+				FileInputStream fis = new FileInputStream("C:\\Users\\Dambhare\\Downloads\\" + contactfile);
+				FileInputStream fis1 = new FileInputStream("C:\\Users\\Dambhare\\Downloads\\" + templatefile);
 
+		        XSSFWorkbook workbook = new XSSFWorkbook(fis);
+		        XSSFWorkbook workbook1 = new XSSFWorkbook(fis1);
+
+		        XSSFSheet sheet = workbook.getSheetAt(0);
+		        XSSFSheet sheet1 = workbook1.getSheetAt(0);
+
+                Integer columnNo = 1;
+                
+                //output all not null values to the list
+                List<Cell> mobcells = new ArrayList<Cell>();
+                List<Cell> msgcells = new ArrayList<Cell>();
+                
+                if (!file.isEmpty() && !template.isEmpty()) 
+				{
+                if (columnNo != null)
+                {
+                    for (Row row : sheet) {
+                    	Cell c = row.getCell(columnNo);
+                       if(c.getStringCellValue().equalsIgnoreCase("Mobile"))
+                       {
+                    	   continue;
+                       } 
+                       else {
+                          mobcells.add(c);
+                       }
+                    }
+                    for (Row row : sheet1) {
+                    	Cell c = row.getCell(columnNo);
+                       if(c.getStringCellValue().equalsIgnoreCase("Template"))
+                       {
+                    	   continue;
+                       } 
+                       else {
+                          msgcells.add(c);
+                       }
+                    }
+                }
+                for (Cell contact : mobcells)
+				{
+					for (Cell msg : msgcells) 
+						{
+						if(moblist.contains(contact.getStringCellValue()))
+							{
+							 PushNotificationTracker track = new PushNotificationTracker();
+							  track.setPn_to(contact.getStringCellValue()); 
+							  track.setMessage(msg.getStringCellValue()); 
+							  track.setPn_sent_status("P");
+							  notificationTrackService.addNotification(track);
+							  rd.addFlashAttribute("success", "Bulk Notification has been sent succesfully!!!!!!!!!!!!!! ");
+
+							}
+							else
+							{
+								rd.addFlashAttribute(contact.getStringCellValue() );
+							}
+						}
+				}
+				}
+                
+                workbook.close();
+                workbook1.close();
 			} else {
-				mv.addObject("exterror", "please enter proper excel file..");
+				if(!template.isEmpty())
+				{
+					List<String> moblist1=userservice.searchMob();
+				BufferedReader br1 = new BufferedReader(new FileReader("C:\\Users\\Dambhare\\Downloads\\" + templatefile));
+				String line1 = br1.readLine();
+				while ((line1 = br1.readLine()) != null) 
+				{
+										
+				String[] b1 = line1.split(splitBy);
+					if (b1.length != 2) 
+					{ // Skip any "weird" (e.g., empty) line
+					continue;
+				}msglist.add(b1[1]);
+				}
+				if (!moblist1.isEmpty()) {
+					for (String p : moblist1) {
+						for (String msg:msglist) 
+						{
+							  PushNotificationTracker track=new PushNotificationTracker();
+							  track.setPn_to(p); 
+							  track.setMessage(msg);
+							  track.setPn_sent_status("P");
+							  notificationTrackService.addNotification(track);
+							  rd.addFlashAttribute("success", "Bulk Notification has been sent succesfully!!!!!!!!!!!!!! ");
+						}
+					}
+				}
+				br1.close();
+				}
+				else
+				{
+					rd.addFlashAttribute("emptyerr", "Please select atleast one option");
+				}
 			}
-
-		} catch (Exception e) {
+		        
+		} 
+		 catch (Exception e) {
 			e.printStackTrace();
 		}
 
