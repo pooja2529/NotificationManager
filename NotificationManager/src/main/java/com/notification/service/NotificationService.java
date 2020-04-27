@@ -39,7 +39,7 @@ NotificationRepository notificationRepository;
 		return contentlist;
 	}
 	
-	public List<String> findSingleContent(int templateid)
+	public String findSingleContent(int templateid)
 	{
 		return notificationRepository.findSingleContent(templateid);
 	}

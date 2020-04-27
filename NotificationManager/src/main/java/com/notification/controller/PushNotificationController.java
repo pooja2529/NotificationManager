@@ -2,7 +2,6 @@ package com.notification.controller;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,9 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,17 +20,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jsmpp.bean.OptionalParameter.Int;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.ui.Model;
@@ -217,10 +210,10 @@ public class PushNotificationController {
 			ArrayList<String> msglist = new ArrayList<String>();
 			ArrayList<String> contactlist = new ArrayList<String>();
 			
-			List<String> moblist = userservice.searchMob();
-			List<String> contentlist = masterService.searchContent();
+			List<User> moblist = userservice.getAllUser();
+			//List<String> contentlist = masterService.searchContent();
 			System.out.println(moblist);
-			System.out.println(contentlist);
+			//System.out.println(contentlist);
 			if (contactfileext.equalsIgnoreCase("csv") && templatefileext.equalsIgnoreCase("csv")) {
 				if (!file.isEmpty() && !template.isEmpty()) 
 				{
@@ -241,37 +234,40 @@ public class PushNotificationController {
 						contactlist.add(b[1]);
 						msglist.add(b1[1]);
 					}
-					for (int i=0;i<moblist.size();i++)
+					for (User u:moblist)
 					{
-						for(i=0;i<contentlist.size();i++) 
-						{
-							if(moblist.contains(moblist.get(i)))
+						int id=Integer.parseInt(u.getLang());
+						String templist=masterService.findSingleContent(id);
+						
+							if(contactlist.contains(u.getMobilenumber()))
 								{
-								
+								if(msglist.contains(templist))
+										{
 													PushNotificationTracker track = new PushNotificationTracker();
-														track.setPn_to(contactlist.get(i)); 
-														track.setMessage(msglist.get(i)); 
+														track.setPn_to(u.getMobilenumber()); 
+														track.setMessage(templist); 
 														track.setPn_sent_status("P");
 														track.setSendafter(null);
 														notificationTrackService.addNotification(track);
 														rd.addFlashAttribute("success", "Bulk Notification has been sent succesfully!!!!!!!!!!!!!! ");
+										}
 														
 										
-								
+										
 								}
 								else
 								{ 
 								    FileWriter writer = new FileWriter("C:\\Users\\Dambhare\\Downloads\\Invalid.csv" );
 								    
-									List<String> templist=new ArrayList<>();
-									templist.add(msglist.get(i));
-								    String collect = templist.stream().collect(Collectors.joining(","));
+									List<String> temp=new ArrayList<>();
+									temp.add(u.getMobilenumber());
+								    String collect = temp.stream().collect(Collectors.joining(","));
 								    writer.write(collect);
 								    rd.addFlashAttribute("mob"," is not registered");
 								    writer.close();
-								    templist.clear();
+								    temp.clear();
 								}	
-						}
+							
 					}
 					br.close();
 					br1.close();
